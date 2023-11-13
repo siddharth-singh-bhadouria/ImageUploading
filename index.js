@@ -2,10 +2,11 @@ const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
+const User = require("./models/Users");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 // Connect to MongoDB
-mongoose.connect("mongodb://localhost/yourDatabase", {
+mongoose.connect("mongodb://127.0.0.1:27017/image-uploading", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -13,7 +14,7 @@ mongoose.connect("mongodb://localhost/yourDatabase", {
 const app = express();
 
 app.use(
-  session({ secret: "secretKey", resave: false, saveUninitialized: false })
+  session({ secret: "notagreatkey", resave: false, saveUninitialized: false })
 );
 app.use(passport.initialize());
 app.use(passport.session());
@@ -35,16 +36,8 @@ passport.use(
   )
 );
 
-passport.serializeUser(function (user, done) {
-  done(null, user.id);
-});
-
-passport.deserializeUser(function (id, done) {
-  // User.findById(id, function(err, user) {
-  //   done(err, user);
-  // });
-  // Implement user deserialization logic here
-});
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 // Routes
 app.get(
@@ -61,4 +54,5 @@ app.get(
 );
 
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
