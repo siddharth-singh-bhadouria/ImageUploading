@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
+
 const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
@@ -16,6 +20,7 @@ const app = express();
 app.use(
   session({ secret: "notagreatkey", resave: false, saveUninitialized: false })
 );
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -23,15 +28,12 @@ app.use(passport.session());
 passport.use(
   new GoogleStrategy(
     {
-      clientID: "YOUR_GOOGLE_CLIENT_ID",
-      clientSecret: "YOUR_GOOGLE_CLIENT_SECRET",
-      callbackURL: "/auth/google/callback",
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "http://localhost:3000/auth/google/callback",
     },
-    function (accessToken, refreshToken, profile, cb) {
-      // User.findOrCreate({ googleId: profile.id }, function (err, user) {
-      //   return cb(err, user);
-      // });
-      // Implement user finding or creation logic here
+    function (accessToken, refreshToken, profile, done) {
+      return done(err, profile);
     }
   )
 );
